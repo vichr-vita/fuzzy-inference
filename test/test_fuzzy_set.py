@@ -1,7 +1,8 @@
+from random import uniform
 import unittest
 
-from fuzzy_inference.set.fuzzy_set import FuzzySet, piecewise_linear, trapezoidal, triangular
-
+from fuzzy_inference.fuzzy_set import FuzzySet, piecewise_linear, trapezoidal, triangular
+import numpy as np
 
 class FuzzySetTestCase(unittest.TestCase):
 
@@ -45,3 +46,24 @@ class FuzzySetTestCase(unittest.TestCase):
         t2 = FuzzySet.triangular(0.4, 0.5, 0.6)
         intersect = t1.union(t2, 0.4, 0.6, resolution=3)
         self.assertEqual(intersect[1, 1], 1)
+
+    def test_l_ramp(self):
+        lr = FuzzySet.l_ramp(0, 1)
+
+        self.assertEqual(lr.mu(-10), 1)
+        self.assertEqual(lr.mu(0.5), 0.5)
+        self.assertEqual(lr.mu(2), 0)
+        self.assertEqual(lr.mu(10), 0)
+
+    def test_r_ramp(self):
+        lr = FuzzySet.r_ramp(0, 1)
+
+        self.assertEqual(lr.mu(-10), 0)
+        self.assertEqual(lr.mu(0.5), 0.5)
+        self.assertEqual(lr.mu(2), 1)
+        self.assertEqual(lr.mu(10), 1)
+
+    def test_ceil(self):
+        lr = FuzzySet.r_ramp(0, 1)
+        ceil = FuzzySet.uniform(0.5)
+        self.assertEqual(lr.intersection(ceil, 0, 1, 11)[-1][1], 0.5)

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from math import isnan, nan, inf
+from math import nan, inf
 from typing import Callable
 import numpy as np
 
@@ -31,6 +31,22 @@ def triangular(x: float, a: float, b: float, c: float, height: float = 1.0) -> f
     ))  # type: ignore
 
 
+def l_ramp(x: float, start: float, end: float, height: float = 1) -> float:
+    return piecewise_linear(x, (
+        (-np.Inf, height),
+        (start, height),
+        (end, 0)
+    ))  # type: ignore
+
+
+def r_ramp(x: float, start: float, end: float, height: float = 1) -> float:
+    return piecewise_linear(x, (
+        (start, 0),
+        (end, height),
+        (np.Inf, height)
+    ))  # type: ignore
+
+
 class FuzzySet:
 
     def __init__(self, mu_x: Callable, **kwargs) -> None:
@@ -42,6 +58,18 @@ class FuzzySet:
 
     def discrete(self, x_from: float, x_to: float, resolution: int):
         return np.array([np.array([x, self.mu(x)]) for x in np.linspace(x_from, x_to, resolution)])
+
+    @staticmethod
+    def uniform(height: float = 1):
+        return FuzzySet(lambda x: height)
+
+    @staticmethod
+    def l_ramp(start: float, end: float, height: float = 1):
+        return FuzzySet(l_ramp, start=start, end=end, height=height)
+
+    @staticmethod
+    def r_ramp(start: float, end: float, height: float = 1):
+        return FuzzySet(r_ramp, start=start, end=end, height=height)
 
     @staticmethod
     def piecewise_linear(vertices: tuple) -> FuzzySet:
