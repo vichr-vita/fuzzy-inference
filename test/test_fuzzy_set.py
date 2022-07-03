@@ -38,14 +38,14 @@ class FuzzySetTestCase(unittest.TestCase):
     def test_intersection(self):
         t1 = FuzzySet.trapezoidal(0, 1, 2, 3)
         t2 = FuzzySet.triangular(0.4, 0.5, 0.6)
-        intersect = t1.intersection(t2, 0.4, 0.6, resolution=3)
-        self.assertEqual(intersect[1, 1], 0.5)
+        intersect = FuzzySet.intersection(t1, t2, 0, 3, resolution=100)
+        self.assertEqual(intersect.mu(1), 0)
 
     def test_union(self):
         t1 = FuzzySet.trapezoidal(0, 1, 2, 3)
         t2 = FuzzySet.triangular(0.4, 0.5, 0.6)
-        intersect = t1.union(t2, 0.4, 0.6, resolution=3)
-        self.assertEqual(intersect[1, 1], 1)
+        union = FuzzySet.union(t1, t2, 0, 3, resolution=100)
+        self.assertEqual(union.mu(1), 1)
 
     def test_l_ramp(self):
         lr = FuzzySet.l_ramp(0, 1)
@@ -66,4 +66,5 @@ class FuzzySetTestCase(unittest.TestCase):
     def test_ceil(self):
         lr = FuzzySet.r_ramp(0, 1)
         ceil = FuzzySet.uniform(0.5)
-        self.assertEqual(lr.intersection(ceil, 0, 1, 11)[-1][1], 0.5)
+        self.assertEqual(FuzzySet.intersection(
+            lr, ceil, 0, 1, 11).mu(0.5), 0.5)

@@ -5,7 +5,7 @@ from typing import Callable
 import numpy as np
 
 
-def piecewise_linear(x: float, vertices: tuple[tuple]) -> float:
+def piecewise_linear(x: float, vertices: tuple[tuple]) -> tuple[float, tuple[tuple]]:
     """
     vertices have to be sorted by x
     memberships have to start with 0
@@ -52,12 +52,21 @@ class FuzzySet:
     def __init__(self, mu_x: Callable, **kwargs) -> None:
         self.mu_x = mu_x
         self.kwargs = kwargs
+        self._height: float | None = None
 
     def mu(self, x: float) -> float:
         return self.mu_x(x, **self.kwargs)
 
     def discrete(self, x_from: float, x_to: float, resolution: int):
         return np.array([np.array([x, self.mu(x)]) for x in np.linspace(x_from, x_to, resolution)])
+
+    @property
+    def height(self) -> float | None:
+        return self._height
+
+    @height.setter
+    def height(self, height):
+        self._height = height
 
     @staticmethod
     def uniform(height: float = 1):
@@ -83,20 +92,28 @@ class FuzzySet:
     def triangular(a: float, b: float, c: float, height: float = 1) -> FuzzySet:
         return FuzzySet(triangular, a=a, b=b, c=c, height=height)
 
-    def intersection(self, f2: FuzzySet, x_from, x_to, resolution=100):
+    @staticmethod
+    def intersection(f1: FuzzySet, f2: FuzzySet, x_from, x_to, resolution=100):
         """
         using minimum t-norm
         SOMEDAY: different t-norms
         """
         x = np.linspace(x_from, x_to, resolution)
-        return np.vstack((x, np.minimum(self.discrete(x_from, x_to, resolution)[
+        vertices = np.vstack((x, np.minimum(f1.discrete(x_from, x_to, resolution)[
             :, 1], f2.discrete(x_from, x_to, resolution)[:, 1]))).T
+        f3 = FuzzySet.piecewise_linear(vertices=vertices)  # type: ignore
+        f3.height = np.max(vertices[:, 1])
+        return f3
 
-    def union(self, f2: FuzzySet, x_from, x_to, resolution=100):
+    @staticmethod
+    def union(f1: FuzzySet, f2: FuzzySet, x_from, x_to, resolution=100):
         """
         using minimum t-norm
         SOMEDAY: different t-norms
         """
         x = np.linspace(x_from, x_to, resolution)
-        return np.vstack((x, np.maximum(self.discrete(x_from, x_to, resolution)[
+        vertices = np.vstack((x, np.maximum(f1.discrete(x_from, x_to, resolution)[
             :, 1], f2.discrete(x_from, x_to, resolution)[:, 1]))).T
+        f3 = FuzzySet.piecewise_linear(vertices=vertices)  # type: ignore
+        f3.height = np.min(vertices[:, 1])
+        return f3

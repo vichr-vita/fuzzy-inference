@@ -19,4 +19,5 @@ class LinguisticVariableTestCase(unittest.TestCase):
             'About Half': FuzzySet.trapezoidal(0.2, 0.4, 0.6, 0.8),
             'Most': FuzzySet.r_ramp(0.6, 0.8)
         })
-        print(quantifier.fuzzify_fuzzy(FuzzySet.triangular(0.3, 0.4, 0.5)))
+        self.assertAlmostEqual(quantifier.fuzzify_fuzzy(
+            FuzzySet.triangular(0.3, 0.4, 0.5))['Few'], 0.333, 3)
