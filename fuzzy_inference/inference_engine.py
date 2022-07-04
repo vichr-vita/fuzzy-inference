@@ -38,12 +38,10 @@ class InferenceEngine:
             ceil: float = min([self.inputvars[ant[0]].fuzzified[ant[1]]
                                for ant in rule.antecedents])
             outvar: LinguisticVariable = self.outputvars[rule.consequent[0]]
-            # ok, I need to set value first to access fuzzified
-            B = outvar.fuzzified[rule.consequent[1]]
+            # you do not actually need fuzzified, you need the initial fuzzy set
+
+            B = outvar.terms[rule.consequent[1]]
             B_prime = FuzzySet.intersection(
                 B, FuzzySet.uniform(ceil), outvar.min, outvar.max)
             outvar.output_measure = FuzzySet.union(
                 outvar.output_measure, B_prime, outvar.min, outvar.max)
-
-            # outvar.output_measure =
-            # TODO: next

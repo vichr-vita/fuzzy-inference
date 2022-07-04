@@ -52,6 +52,8 @@ class InferenceEngineTestCase(unittest.TestCase):
         l = [(x, engine.outputvars['risk'].output_measure.mu(x))
              for x in np.arange(0, 1, 0.01)]
 
+        # TODO get output fuzzy set
+        # TODO defuzzification
         print()
         print()
         print()
